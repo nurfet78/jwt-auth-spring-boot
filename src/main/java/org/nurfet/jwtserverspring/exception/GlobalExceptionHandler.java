@@ -59,15 +59,4 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("Message", response));
     }
-
-    @ExceptionHandler(CustomJwtException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<?> authJwtHandle(HttpServletRequest request, CustomJwtException e) {
-        ApiError response = new ApiError(HttpStatus.BAD_REQUEST.value(), request.getRequestURL().toString(),
-                DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
-                        .withZone(ZoneId.systemDefault()).format(Instant.now()),
-                e.getMessage());
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("Message", response));
-    }
 }

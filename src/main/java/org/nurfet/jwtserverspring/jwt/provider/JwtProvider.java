@@ -2,13 +2,11 @@ package org.nurfet.jwtserverspring.jwt.provider;
 
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.nurfet.jwtserverspring.exception.CustomJwtException;
 import org.nurfet.jwtserverspring.jwt.config.JwtConfig;
 import org.nurfet.jwtserverspring.jwt.utils.DateUtils;
 import org.nurfet.jwtserverspring.jwt.utils.JwtConstants;
@@ -85,32 +83,24 @@ public class JwtProvider {
     }
 
     private boolean isTokenExpired(@NonNull String token, @NonNull SecretKey secret) {
-        try {
-            final Date expiration = Jwts.parser()
-                    .verifyWith(secret)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .getExpiration();
-            return expiration.before(new Date());
-        } catch (JwtException e) {
-            throw new CustomJwtException("Token expiration check error", e);
-        }
+        final Date expiration = Jwts.parser()
+                .verifyWith(secret)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getExpiration();
+        return expiration.before(new Date());
     }
 
     private boolean validateToken(String token, SecretKey key) {
         if (isTokenExpired(token, key)) {
             return false;
         }
-        try {
-            Jwts.parser()
-                    .verifyWith(key)
-                    .build()
-                    .parseSignedClaims(token);
-            return true;
-        } catch (JwtException e) {
-            throw new CustomJwtException("Token validation failed", e);
-        }
+        Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token);
+        return true;
     }
 
     public boolean validateAccessToken(String token) {
