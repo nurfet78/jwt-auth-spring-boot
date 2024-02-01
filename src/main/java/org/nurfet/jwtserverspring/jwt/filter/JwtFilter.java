@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.nurfet.jwtserverspring.exception.ApiError;
 import org.nurfet.jwtserverspring.jwt.provider.JwtProvider;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -63,8 +64,10 @@ public class JwtFilter extends GenericFilterBean {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
+        String reasonPhrase = HttpStatus.UNAUTHORIZED.getReasonPhrase();
         ApiError apiError = new ApiError(
                 HttpServletResponse.SC_UNAUTHORIZED,
+                reasonPhrase,
                 request.getRequestURL().toString(),
                 DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").withZone(ZoneId.systemDefault()).format(Instant.now()),
                 clientMessage

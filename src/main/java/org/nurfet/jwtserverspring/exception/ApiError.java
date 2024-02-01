@@ -11,6 +11,8 @@ public class ApiError {
 
     private int status;
 
+    private String error;
+
     private String url;
 
     private String timestamp;

@@ -20,7 +20,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<?> handleNotFound(HttpServletRequest request, NotFoundException e) {
-        ApiError response = new ApiError(HttpStatus.NOT_FOUND.value(), request.getRequestURL().toString(),
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        ApiError response = new ApiError(
+                status.value(),
+                status.getReasonPhrase(),
+                request.getRequestURL().toString(),
                 DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
                         .withZone(ZoneId.systemDefault()).format(Instant.now()),
                 e.getMessage());
@@ -31,7 +35,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<?> NotFound(HttpServletRequest request, UserNotFoundException e) {
-        ApiError response = new ApiError(HttpStatus.NOT_FOUND.value(), request.getRequestURL().toString(),
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        ApiError response = new ApiError(
+                status.value(),
+                status.getReasonPhrase(),
+                request.getRequestURL().toString(),
                 DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
                         .withZone(ZoneId.systemDefault()).format(Instant.now()),
                 e.getMessage());
@@ -40,9 +48,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
     public ResponseEntity<?> forbidden(HttpServletRequest request, AccessDeniedException e) {
-        ApiError response = new ApiError(HttpStatus.NOT_FOUND.value(), request.getRequestURL().toString(),
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        ApiError response = new ApiError(
+                status.value(),
+                status.getReasonPhrase(),
+                request.getRequestURL().toString(),
                 DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
                         .withZone(ZoneId.systemDefault()).format(Instant.now()),
                 e.getMessage());
@@ -53,7 +65,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ResponseEntity<?> authHandle(HttpServletRequest request, AuthException e) {
-        ApiError response = new ApiError(HttpStatus.UNAUTHORIZED.value(), request.getRequestURL().toString(),
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        ApiError response = new ApiError(
+                status.value(),
+                status.getReasonPhrase(),
+                request.getRequestURL().toString(),
                 DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
                         .withZone(ZoneId.systemDefault()).format(Instant.now()),
                 e.getMessage());
