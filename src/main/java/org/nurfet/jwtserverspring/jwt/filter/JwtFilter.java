@@ -2,7 +2,9 @@ package org.nurfet.jwtserverspring.jwt.filter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -20,6 +22,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
+import java.security.SignatureException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -42,25 +45,35 @@ public class JwtFilter extends GenericFilterBean {
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
             filterChain.doFilter(servletRequest, servletResponse);
+        }  catch (ExpiredJwtException e) {
+            sendErrorResponse((HttpServletRequest) servletRequest, (HttpServletResponse) servletResponse,
+                    e.getMessage(), "Срок действия JWT токена истек");
+        } catch (MalformedJwtException e) {
+            sendErrorResponse((HttpServletRequest) servletRequest, (HttpServletResponse) servletResponse,
+                    e.getMessage(), "Неправильно сформированный JWT токен");
         } catch (JwtException e) {
-            HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
-
-            httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            httpResponse.setContentType("application/json");
-
-            ApiError apiError = new ApiError(
-                    HttpServletResponse.SC_UNAUTHORIZED,
-                    ((HttpServletRequest) servletRequest).getRequestURL().toString(),
-                    DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
-                            .withZone(ZoneId.systemDefault()).format(Instant.now()),
-                    e.getMessage()
-            );
-
-            String jsonError = convertApiErrorToJson(apiError);
-
-            httpResponse.getWriter().write(jsonError);
-            httpResponse.getWriter().flush();
+            sendErrorResponse((HttpServletRequest) servletRequest, (HttpServletResponse) servletResponse,
+                    e.getMessage(), "Недействительный JWT токен");
         }
+    }
+
+    private void sendErrorResponse(HttpServletRequest request, HttpServletResponse response, String logMessage, String clientMessage) throws IOException {
+        log.error(logMessage);
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+
+        ApiError apiError = new ApiError(
+                HttpServletResponse.SC_UNAUTHORIZED,
+                request.getRequestURL().toString(),
+                DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").withZone(ZoneId.systemDefault()).format(Instant.now()),
+                clientMessage
+        );
+
+        String jsonError = convertApiErrorToJson(apiError);
+
+        response.getWriter().write(jsonError);
+        response.getWriter().flush();
     }
     private String getTokenFromRequest(HttpServletRequest request) {
         final String bearer = request.getHeader(AUTHORIZATION);

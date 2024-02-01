@@ -82,25 +82,13 @@ public class JwtProvider {
         return createToken(claims, user.getUsername(), key, expirationMinutes);
     }
 
-    private boolean isTokenExpired(@NonNull String token, @NonNull SecretKey secret) {
-        final Date expiration = Jwts.parser()
-                .verifyWith(secret)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getExpiration();
-        return expiration.before(new Date());
+    private boolean isTokenExpired(Claims claims) {
+        return claims.getExpiration().before(new Date());
     }
 
     private boolean validateToken(String token, SecretKey key) {
-        if (isTokenExpired(token, key)) {
-            return false;
-        }
-        Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token);
-        return true;
+
+        return !isTokenExpired(extractClaims(token, key));
     }
 
     public boolean validateAccessToken(String token) {
