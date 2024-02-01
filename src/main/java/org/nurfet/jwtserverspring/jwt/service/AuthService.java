@@ -1,6 +1,7 @@
 package org.nurfet.jwtserverspring.jwt.service;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.nurfet.jwtserverspring.dto.UserDto;
@@ -42,7 +43,7 @@ public class AuthService {
         if (passwordEncoder.matches(authRequest.getPassword(), user.getPassword())) {
             return getJwtResponse(user);
         } else {
-            return new JwtResponse("Неправильный пароль");
+            throw new AuthException("Неправильный пароль");
         }
     }
 
@@ -75,7 +76,8 @@ public class AuthService {
                 return new JwtResponse(role, accessToken, null);
             }
         }
-        return new JwtResponse("Недействительный JWT токен");
+
+        throw new AuthException("Недействительный JWT токен");
     }
 
     public JwtResponse refresh(@NonNull String refreshToken) {
@@ -91,7 +93,7 @@ public class AuthService {
                 return getJwtResponse(user);
             }
         }
-        return new JwtResponse("Невалидный JWT токен");
+        throw new AuthException("Невалидный JWT токен");
     }
     public void updateUserAndTokens(User existingUser, UserDto updatedUserDto) {
         existingUser.setFirstName(updatedUserDto.getFirstName());

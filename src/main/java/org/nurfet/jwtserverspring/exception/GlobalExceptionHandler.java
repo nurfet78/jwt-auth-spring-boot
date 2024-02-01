@@ -1,6 +1,7 @@
 package org.nurfet.jwtserverspring.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -50,13 +51,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AuthException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ResponseEntity<?> authHandle(HttpServletRequest request, AuthException e) {
-        ApiError response = new ApiError(HttpStatus.BAD_REQUEST.value(), request.getRequestURL().toString(),
+        ApiError response = new ApiError(HttpStatus.UNAUTHORIZED.value(), request.getRequestURL().toString(),
                 DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
                         .withZone(ZoneId.systemDefault()).format(Instant.now()),
                 e.getMessage());
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("Message", response));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", response));
     }
 }

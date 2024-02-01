@@ -2,9 +2,7 @@ package org.nurfet.jwtserverspring.jwt.filter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.*;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -51,7 +49,8 @@ public class JwtFilter extends GenericFilterBean {
         } catch (MalformedJwtException e) {
             sendErrorResponse((HttpServletRequest) servletRequest, (HttpServletResponse) servletResponse,
                     e.getMessage(), "Неправильно сформированный JWT токен");
-        } catch (JwtException e) {
+        }
+        catch (JwtException e) {
             sendErrorResponse((HttpServletRequest) servletRequest, (HttpServletResponse) servletResponse,
                     e.getMessage(), "Недействительный JWT токен");
         }
@@ -89,7 +88,7 @@ public class JwtFilter extends GenericFilterBean {
         try {
             return mapper.writeValueAsString(apiError);
         } catch (JsonProcessingException e) {
-            log.error("сериализации в JSON");
+            log.error("Cериализации в JSON завершилась ошибкой {}", e.getMessage());
         }
         return "{}";
     }
