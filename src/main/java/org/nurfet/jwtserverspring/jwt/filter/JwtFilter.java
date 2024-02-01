@@ -58,10 +58,11 @@ public class JwtFilter extends GenericFilterBean {
     }
 
     private void sendErrorResponse(HttpServletRequest request, HttpServletResponse response, String logMessage, String clientMessage) throws IOException {
-        log.error(logMessage);
+        log.error("Exception Details: {}", logMessage);
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
         ApiError apiError = new ApiError(
                 HttpServletResponse.SC_UNAUTHORIZED,
