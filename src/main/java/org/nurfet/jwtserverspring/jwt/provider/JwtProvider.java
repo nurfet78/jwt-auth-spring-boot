@@ -1,11 +1,14 @@
 package org.nurfet.jwtserverspring.jwt.provider;
 
 
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.nurfet.jwtserverspring.jwt.config.JwtConfig;
 import org.nurfet.jwtserverspring.jwt.utils.DateUtils;
@@ -17,6 +20,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import org.nurfet.jwtserverspring.exception.CustomJwtException;
+import org.springframework.web.server.ResponseStatusException;
 
 
 import javax.crypto.SecretKey;
@@ -86,9 +92,18 @@ public class JwtProvider {
         return claims.getExpiration().before(new Date());
     }
 
-    private boolean validateToken(String token, SecretKey key) {
-
-        return !isTokenExpired(extractClaims(token, key));
+    private boolean validateToken(String token, SecretKey key)  {
+        try {
+            return !isTokenExpired(extractClaims(token, key));
+        } catch (ExpiredJwtException expEx) {
+            throw new CustomJwtException("Срок действия JWT токена истек", expEx);
+        } catch (UnsupportedJwtException unsEx) {
+            throw new CustomJwtException("Неподдерживаемый JWT токен", unsEx);
+        } catch (MalformedJwtException mjEx) {
+            throw new CustomJwtException("Неправильно сформированный JWT токен", mjEx);
+        } catch (JwtException | ResponseStatusException sEx) {
+            throw new CustomJwtException("Недействительный JWT токен", sEx);
+        }
     }
 
     public boolean validateAccessToken(String token) {

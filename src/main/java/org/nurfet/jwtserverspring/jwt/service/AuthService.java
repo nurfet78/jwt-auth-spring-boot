@@ -1,11 +1,12 @@
 package org.nurfet.jwtserverspring.jwt.service;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.nurfet.jwtserverspring.dto.UserDto;
 import org.nurfet.jwtserverspring.exception.AuthException;
+import org.nurfet.jwtserverspring.exception.CustomJwtException;
+import org.nurfet.jwtserverspring.exception.NotFoundException;
 import org.nurfet.jwtserverspring.jwt.provider.JwtProvider;
 import org.nurfet.jwtserverspring.jwt.model.JwtResponse;
 import org.nurfet.jwtserverspring.model.User;
@@ -15,9 +16,11 @@ import org.nurfet.jwtserverspring.model.Role;
 import org.nurfet.jwtserverspring.exception.UserNotFoundException;
 import org.nurfet.jwtserverspring.service.RoleService;
 import org.nurfet.jwtserverspring.service.UserService;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.Collections;
 import java.util.stream.Collectors;
@@ -76,11 +79,11 @@ public class AuthService {
                 return new JwtResponse(role, accessToken, null);
             }
         }
-
-        throw new AuthException("Недействительный JWT токен");
+        return null;
     }
 
-    public JwtResponse refresh(@NonNull String refreshToken) {
+    public JwtResponse refresh(String refreshToken){
+
         if (jwtProvider.validateRefreshToken(refreshToken)) {
             final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
             final String username = claims.getSubject();
@@ -93,7 +96,8 @@ public class AuthService {
                 return getJwtResponse(user);
             }
         }
-        throw new AuthException("Невалидный JWT токен");
+
+        return null;
     }
     public void updateUserAndTokens(User existingUser, UserDto updatedUserDto) {
         existingUser.setFirstName(updatedUserDto.getFirstName());
