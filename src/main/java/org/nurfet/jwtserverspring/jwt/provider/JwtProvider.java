@@ -1,12 +1,7 @@
 package org.nurfet.jwtserverspring.jwt.provider;
 
 
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.crypto.SecretKey;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Date;
@@ -65,7 +61,8 @@ public class JwtProvider {
                 .subject(subject)
                 .issuedAt(issuedAt)
                 .expiration(expiration)
-                .signWith(key, Jwts.SIG.HS512).compact();
+                .signWith(key, Jwts.SIG.HS256)
+                .compact();
 
     }
 
@@ -135,7 +132,7 @@ public class JwtProvider {
         Claims claims = getAccessClaims(token);
 
         Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get("roles").toString().split(","))
+                Arrays.stream(claims.get(JwtConstants.ROLES_CLAIM).toString().split(","))
                         .map(String::trim)
                         .filter(role -> !role.isEmpty())
                         .map(SimpleGrantedAuthority::new)
